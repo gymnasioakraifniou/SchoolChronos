@@ -1,0 +1,75 @@
+# ===== CHRONOS – ΑΙΘΟΥΣΑ: Γ΄ Λυκείου Οικ. & Πληροφορικής (g_lykeiou_oik_plir) =====
+# Helpers + αισθητήρες + media_player ΑΥΤΗΣ της αίθουσας.
+
+input_boolean:
+  chronos_g_lykeiou_oik_plir_audio_enable:
+    name: "Γ΄ Λυκείου Οικ. & Πληροφορικής – Ηχητικός Σταθμός (enable)"
+    icon: mdi:volume-high
+  chronos_g_lykeiou_oik_plir_visual_enable:
+    name: "Γ΄ Λυκείου Οικ. & Πληροφορικής – Οπτικός Σταθμός (enable)"
+    icon: mdi:monitor
+  chronos_g_lykeiou_oik_plir_sim_fire:
+    name: "Γ΄ Λυκείου Οικ. & Πληροφορικής – [SIM] Πυρανίχνευση"
+    icon: mdi:fire
+  chronos_g_lykeiou_oik_plir_sim_audio_online:
+    name: "Γ΄ Λυκείου Οικ. & Πληροφορικής – [SIM] Ηχητικός σταθμός online"
+    icon: mdi:speaker
+  chronos_g_lykeiou_oik_plir_sim_visual_online:
+    name: "Γ΄ Λυκείου Οικ. & Πληροφορικής – [SIM] Οπτικός σταθμός online"
+    icon: mdi:television
+
+input_number:
+  chronos_g_lykeiou_oik_plir_timer_minutes:
+    name: "Γ΄ Λυκείου Οικ. & Πληροφορικής – Λεπτά αντίστροφης μέτρησης"
+    min: 1
+    max: 120
+    step: 1
+    initial: 5
+    unit_of_measurement: min
+    icon: mdi:timer-cog
+
+timer:
+  chronos_g_lykeiou_oik_plir_countdown:
+    name: "Γ΄ Λυκείου Οικ. & Πληροφορικής – Αντίστροφη Μέτρηση"
+    restore: true
+
+input_text:
+  chronos_g_lykeiou_oik_plir_director_msg:
+    name: "Γ΄ Λυκείου Οικ. & Πληροφορικής – Μήνυμα προς Διευθυντή"
+    max: 255
+    icon: mdi:email-fast
+  chronos_g_lykeiou_oik_plir_tts_msg:
+    name: "Γ΄ Λυκείου Οικ. & Πληροφορικής – Κείμενο για εκφώνηση"
+    max: 255
+    icon: mdi:text-to-speech
+
+media_player:
+  - platform: universal
+    name: chronos_g_lykeiou_oik_plir_speaker
+    unique_id: chronos_g_lykeiou_oik_plir_speaker
+    children:
+      - media_player.g_lykeiou_oik_plir
+    device_class: speaker
+
+template:
+  - sensor:
+      - name: chronos_g_lykeiou_oik_plir_quote
+        unique_id: chronos_g_lykeiou_oik_plir_quote_tpl
+        state: >
+          {% set q = state_attr('input_select.chronos_quotes','options') %}
+          {% set idx = ((now().timestamp() // 3600) | int) + 4 %}
+          {{ q[idx % (q | length)] if q else '' }}
+  - binary_sensor:
+      - name: chronos_g_lykeiou_oik_plir_fire
+        unique_id: chronos_g_lykeiou_oik_plir_fire_tpl
+        device_class: smoke
+        state: "{{ is_state('input_boolean.chronos_g_lykeiou_oik_plir_sim_fire','on') }}"
+      - name: chronos_g_lykeiou_oik_plir_audio_station
+        unique_id: chronos_g_lykeiou_oik_plir_audio_station_tpl
+        device_class: connectivity
+        state: "{{ is_state('input_boolean.chronos_g_lykeiou_oik_plir_sim_audio_online','on') }}"
+      - name: chronos_g_lykeiou_oik_plir_visual_station
+        unique_id: chronos_g_lykeiou_oik_plir_visual_station_tpl
+        device_class: connectivity
+        state: "{{ is_state('input_boolean.chronos_g_lykeiou_oik_plir_sim_visual_online','on') }}"
+

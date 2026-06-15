@@ -1,0 +1,57 @@
+- title: Μουσική
+  path: mousiki
+  icon: mdi:music
+  cards:
+    - type: markdown
+      content: "# 🎵 Μουσική & Ανακοινώσεις"
+    - type: entities
+      entities:
+        - entity: input_boolean.chronos_music_master_enable
+        - entity: input_select.chronos_music_track
+    - type: horizontal-stack
+      cards:
+        - type: button
+          name: "Αναπαραγωγή"
+          icon: mdi:play
+          tap_action:
+            action: call-service
+            service: script.chronos_play_music
+        - type: button
+          name: "Διακοπή"
+          icon: mdi:stop
+          tap_action:
+            action: call-service
+            service: script.chronos_stop_music
+    - type: markdown
+      content: "##### 📅 Εβδομαδιαίο πρόγραμμα μουσικής (κλικ για επεξεργασία)"
+    - type: entities
+      entities:
+        - entity: schedule.chronos_music_schedule
+          name: "Πρόγραμμα Μουσικής"
+    - type: entities
+      title: "Σε ποιους χώρους θα παίζει"
+      entities:
+        - entity: input_boolean.chronos_grafeio_diefthynti_audio_enable
+          name: "Γραφείο Διευθυντή"
+        - entity: input_boolean.chronos_grafeio_kathigiton_audio_enable
+          name: "Γραφείο Καθηγητών"
+        - entity: input_boolean.chronos_aithousa_ekdiloseon_audio_enable
+          name: "Αίθουσα Εκδηλώσεων"
+        - entity: input_boolean.chronos_b_lykeiou_audio_enable
+          name: "Β΄ Λυκείου"
+        - entity: input_boolean.chronos_g_lykeiou_oik_plir_audio_enable
+          name: "Γ΄ Λυκείου Οικ. & Πληροφορικής"
+        - entity: input_boolean.chronos_g_lykeiou_theor_audio_enable
+          name: "Γ΄ Λυκείου Θεωρητική"
+        - entity: input_boolean.chronos_a_gymnasiou_audio_enable
+          name: "Α΄ Γυμνασίου"
+        - entity: input_boolean.chronos_b_gymnasiou_audio_enable
+          name: "Β΄ Γυμνασίου"
+        - entity: input_boolean.chronos_g_gymnasiou_audio_enable
+          name: "Γ΄ Γυμνασίου"
+        - entity: input_boolean.chronos_a_lykeiou_audio_enable
+          name: "Α΄ Λυκείου"
+        - entity: input_boolean.chronos_erg_pliroforikis_audio_enable
+          name: "Εργαστήριο Πληροφορικής"
+        - entity: input_boolean.chronos_erg_fysikon_audio_enable
+          name: "Εργαστήριο Φυσικών Επιστημών"

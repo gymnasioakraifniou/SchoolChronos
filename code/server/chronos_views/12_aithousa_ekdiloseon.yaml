@@ -1,0 +1,108 @@
+- title: Αίθουσα Εκδηλώσεων
+  path: aithousa_ekdiloseon
+  icon: mdi:theater
+  cards:
+    - type: markdown
+      content: "# 🏫 Αίθουσα Εκδηλώσεων"
+    - type: markdown
+      content: "> _{{ states('sensor.chronos_aithousa_ekdiloseon_quote') }}_"
+    - type: picture
+      image: /local/chronos/rooms/aithousa_ekdiloseon.jpg
+    - type: entities
+      title: "Σταθμοί Ειδοποίησης"
+      entities:
+        - entity: input_boolean.chronos_aithousa_ekdiloseon_audio_enable
+        - entity: input_boolean.chronos_aithousa_ekdiloseon_visual_enable
+    - type: vertical-stack
+      cards:
+        - type: entities
+          title: "⏱️ Αντίστροφη Μέτρηση"
+          entities:
+            - entity: input_number.chronos_aithousa_ekdiloseon_timer_minutes
+              name: "Λεπτά"
+            - entity: timer.chronos_aithousa_ekdiloseon_countdown
+              name: "Χρονόμετρο"
+        - type: horizontal-stack
+          cards:
+            - type: button
+              name: "Start / Pause"
+              icon: mdi:play-pause
+              tap_action:
+                action: call-service
+                service: script.chronos_timer_toggle
+                data:
+                  room: aithousa_ekdiloseon
+            - type: button
+              name: "Reset"
+              icon: mdi:timer-off
+              tap_action:
+                action: call-service
+                service: script.chronos_timer_reset
+                data:
+                  room: aithousa_ekdiloseon
+    - type: vertical-stack
+      cards:
+        - type: entities
+          title: "📨 Μήνυμα προς Διευθυντή"
+          entities:
+            - entity: input_text.chronos_aithousa_ekdiloseon_director_msg
+              name: "Μήνυμα"
+        - type: button
+          name: "Αποστολή στον Διευθυντή"
+          icon: mdi:email-fast
+          tap_action:
+            action: call-service
+            service: script.chronos_send_director
+            data:
+              room: aithousa_ekdiloseon
+              room_name: "Αίθουσα Εκδηλώσεων"
+    - type: vertical-stack
+      cards:
+        - type: entities
+          title: "🔊 Εκφώνηση (TTS Google)"
+          entities:
+            - entity: input_text.chronos_aithousa_ekdiloseon_tts_msg
+              name: "Κείμενο"
+        - type: button
+          name: "Εκφώνηση"
+          icon: mdi:text-to-speech
+          tap_action:
+            action: call-service
+            service: script.chronos_say_tts
+            data:
+              room: aithousa_ekdiloseon
+              media_player: media_player.chronos_aithousa_ekdiloseon_speaker
+    - type: markdown
+      content: "#### 🔊 Media Player Τάξης"
+    - type: conditional
+      conditions:
+        - entity: media_player.chronos_aithousa_ekdiloseon_speaker
+          state_not: "unavailable"
+      card:
+        type: media-control
+        entity: media_player.chronos_aithousa_ekdiloseon_speaker
+    - type: conditional
+      conditions:
+        - entity: media_player.chronos_aithousa_ekdiloseon_speaker
+          state: "unavailable"
+      card:
+        type: markdown
+        content: "⚠️ Ο player της οθόνης δεν είναι ενεργός. Όρισε στο Browser Mod BrowserID = `aithousa_ekdiloseon` (δες οδηγίες)."
+    - type: entities
+      title: "📡 Κατάσταση Σταθμών & Αισθητήρων"
+      entities:
+        - entity: binary_sensor.chronos_aithousa_ekdiloseon_fire
+          name: "Πυρανίχνευση"
+        - entity: binary_sensor.chronos_aithousa_ekdiloseon_audio_station
+          name: "Ηχητικός Σταθμός"
+        - entity: binary_sensor.chronos_aithousa_ekdiloseon_visual_station
+          name: "Οπτικός Σταθμός"
+    - type: entities
+      title: "🧪 Προσομοίωση (SIM)"
+      entities:
+        - entity: input_boolean.chronos_aithousa_ekdiloseon_sim_fire
+          name: "Φωτιά (SIM)"
+        - entity: input_boolean.chronos_aithousa_ekdiloseon_sim_audio_online
+          name: "Ηχ. online (SIM)"
+        - entity: input_boolean.chronos_aithousa_ekdiloseon_sim_visual_online
+          name: "Οπτ. online (SIM)"

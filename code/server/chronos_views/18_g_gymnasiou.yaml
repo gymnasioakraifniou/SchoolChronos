@@ -1,0 +1,108 @@
+- title: Γ΄ Γυμνασίου
+  path: g_gymnasiou
+  icon: mdi:school-outline
+  cards:
+    - type: markdown
+      content: "# 🏫 Γ΄ Γυμνασίου"
+    - type: markdown
+      content: "> _{{ states('sensor.chronos_g_gymnasiou_quote') }}_"
+    - type: picture
+      image: /local/chronos/rooms/g_gymnasiou.jpg
+    - type: entities
+      title: "Σταθμοί Ειδοποίησης"
+      entities:
+        - entity: input_boolean.chronos_g_gymnasiou_audio_enable
+        - entity: input_boolean.chronos_g_gymnasiou_visual_enable
+    - type: vertical-stack
+      cards:
+        - type: entities
+          title: "⏱️ Αντίστροφη Μέτρηση"
+          entities:
+            - entity: input_number.chronos_g_gymnasiou_timer_minutes
+              name: "Λεπτά"
+            - entity: timer.chronos_g_gymnasiou_countdown
+              name: "Χρονόμετρο"
+        - type: horizontal-stack
+          cards:
+            - type: button
+              name: "Start / Pause"
+              icon: mdi:play-pause
+              tap_action:
+                action: call-service
+                service: script.chronos_timer_toggle
+                data:
+                  room: g_gymnasiou
+            - type: button
+              name: "Reset"
+              icon: mdi:timer-off
+              tap_action:
+                action: call-service
+                service: script.chronos_timer_reset
+                data:
+                  room: g_gymnasiou
+    - type: vertical-stack
+      cards:
+        - type: entities
+          title: "📨 Μήνυμα προς Διευθυντή"
+          entities:
+            - entity: input_text.chronos_g_gymnasiou_director_msg
+              name: "Μήνυμα"
+        - type: button
+          name: "Αποστολή στον Διευθυντή"
+          icon: mdi:email-fast
+          tap_action:
+            action: call-service
+            service: script.chronos_send_director
+            data:
+              room: g_gymnasiou
+              room_name: "Γ΄ Γυμνασίου"
+    - type: vertical-stack
+      cards:
+        - type: entities
+          title: "🔊 Εκφώνηση (TTS Google)"
+          entities:
+            - entity: input_text.chronos_g_gymnasiou_tts_msg
+              name: "Κείμενο"
+        - type: button
+          name: "Εκφώνηση"
+          icon: mdi:text-to-speech
+          tap_action:
+            action: call-service
+            service: script.chronos_say_tts
+            data:
+              room: g_gymnasiou
+              media_player: media_player.chronos_g_gymnasiou_speaker
+    - type: markdown
+      content: "#### 🔊 Media Player Τάξης"
+    - type: conditional
+      conditions:
+        - entity: media_player.chronos_g_gymnasiou_speaker
+          state_not: "unavailable"
+      card:
+        type: media-control
+        entity: media_player.chronos_g_gymnasiou_speaker
+    - type: conditional
+      conditions:
+        - entity: media_player.chronos_g_gymnasiou_speaker
+          state: "unavailable"
+      card:
+        type: markdown
+        content: "⚠️ Ο player της οθόνης δεν είναι ενεργός. Όρισε στο Browser Mod BrowserID = `g_gymnasiou` (δες οδηγίες)."
+    - type: entities
+      title: "📡 Κατάσταση Σταθμών & Αισθητήρων"
+      entities:
+        - entity: binary_sensor.chronos_g_gymnasiou_fire
+          name: "Πυρανίχνευση"
+        - entity: binary_sensor.chronos_g_gymnasiou_audio_station
+          name: "Ηχητικός Σταθμός"
+        - entity: binary_sensor.chronos_g_gymnasiou_visual_station
+          name: "Οπτικός Σταθμός"
+    - type: entities
+      title: "🧪 Προσομοίωση (SIM)"
+      entities:
+        - entity: input_boolean.chronos_g_gymnasiou_sim_fire
+          name: "Φωτιά (SIM)"
+        - entity: input_boolean.chronos_g_gymnasiou_sim_audio_online
+          name: "Ηχ. online (SIM)"
+        - entity: input_boolean.chronos_g_gymnasiou_sim_visual_online
+          name: "Οπτ. online (SIM)"

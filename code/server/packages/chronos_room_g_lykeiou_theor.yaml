@@ -1,0 +1,75 @@
+# ===== CHRONOS – ΑΙΘΟΥΣΑ: Γ΄ Λυκείου Θεωρητική (g_lykeiou_theor) =====
+# Helpers + αισθητήρες + media_player ΑΥΤΗΣ της αίθουσας.
+
+input_boolean:
+  chronos_g_lykeiou_theor_audio_enable:
+    name: "Γ΄ Λυκείου Θεωρητική – Ηχητικός Σταθμός (enable)"
+    icon: mdi:volume-high
+  chronos_g_lykeiou_theor_visual_enable:
+    name: "Γ΄ Λυκείου Θεωρητική – Οπτικός Σταθμός (enable)"
+    icon: mdi:monitor
+  chronos_g_lykeiou_theor_sim_fire:
+    name: "Γ΄ Λυκείου Θεωρητική – [SIM] Πυρανίχνευση"
+    icon: mdi:fire
+  chronos_g_lykeiou_theor_sim_audio_online:
+    name: "Γ΄ Λυκείου Θεωρητική – [SIM] Ηχητικός σταθμός online"
+    icon: mdi:speaker
+  chronos_g_lykeiou_theor_sim_visual_online:
+    name: "Γ΄ Λυκείου Θεωρητική – [SIM] Οπτικός σταθμός online"
+    icon: mdi:television
+
+input_number:
+  chronos_g_lykeiou_theor_timer_minutes:
+    name: "Γ΄ Λυκείου Θεωρητική – Λεπτά αντίστροφης μέτρησης"
+    min: 1
+    max: 120
+    step: 1
+    initial: 5
+    unit_of_measurement: min
+    icon: mdi:timer-cog
+
+timer:
+  chronos_g_lykeiou_theor_countdown:
+    name: "Γ΄ Λυκείου Θεωρητική – Αντίστροφη Μέτρηση"
+    restore: true
+
+input_text:
+  chronos_g_lykeiou_theor_director_msg:
+    name: "Γ΄ Λυκείου Θεωρητική – Μήνυμα προς Διευθυντή"
+    max: 255
+    icon: mdi:email-fast
+  chronos_g_lykeiou_theor_tts_msg:
+    name: "Γ΄ Λυκείου Θεωρητική – Κείμενο για εκφώνηση"
+    max: 255
+    icon: mdi:text-to-speech
+
+media_player:
+  - platform: universal
+    name: chronos_g_lykeiou_theor_speaker
+    unique_id: chronos_g_lykeiou_theor_speaker
+    children:
+      - media_player.g_lykeiou_theor
+    device_class: speaker
+
+template:
+  - sensor:
+      - name: chronos_g_lykeiou_theor_quote
+        unique_id: chronos_g_lykeiou_theor_quote_tpl
+        state: >
+          {% set q = state_attr('input_select.chronos_quotes','options') %}
+          {% set idx = ((now().timestamp() // 3600) | int) + 5 %}
+          {{ q[idx % (q | length)] if q else '' }}
+  - binary_sensor:
+      - name: chronos_g_lykeiou_theor_fire
+        unique_id: chronos_g_lykeiou_theor_fire_tpl
+        device_class: smoke
+        state: "{{ is_state('input_boolean.chronos_g_lykeiou_theor_sim_fire','on') }}"
+      - name: chronos_g_lykeiou_theor_audio_station
+        unique_id: chronos_g_lykeiou_theor_audio_station_tpl
+        device_class: connectivity
+        state: "{{ is_state('input_boolean.chronos_g_lykeiou_theor_sim_audio_online','on') }}"
+      - name: chronos_g_lykeiou_theor_visual_station
+        unique_id: chronos_g_lykeiou_theor_visual_station_tpl
+        device_class: connectivity
+        state: "{{ is_state('input_boolean.chronos_g_lykeiou_theor_sim_visual_online','on') }}"
+

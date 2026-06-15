@@ -1,0 +1,108 @@
+- title: Εργαστήριο Φυσικών Επιστημών
+  path: erg_fysikon
+  icon: mdi:flask
+  cards:
+    - type: markdown
+      content: "# 🏫 Εργαστήριο Φυσικών Επιστημών"
+    - type: markdown
+      content: "> _{{ states('sensor.chronos_erg_fysikon_quote') }}_"
+    - type: picture
+      image: /local/chronos/rooms/erg_fysikon.jpg
+    - type: entities
+      title: "Σταθμοί Ειδοποίησης"
+      entities:
+        - entity: input_boolean.chronos_erg_fysikon_audio_enable
+        - entity: input_boolean.chronos_erg_fysikon_visual_enable
+    - type: vertical-stack
+      cards:
+        - type: entities
+          title: "⏱️ Αντίστροφη Μέτρηση"
+          entities:
+            - entity: input_number.chronos_erg_fysikon_timer_minutes
+              name: "Λεπτά"
+            - entity: timer.chronos_erg_fysikon_countdown
+              name: "Χρονόμετρο"
+        - type: horizontal-stack
+          cards:
+            - type: button
+              name: "Start / Pause"
+              icon: mdi:play-pause
+              tap_action:
+                action: call-service
+                service: script.chronos_timer_toggle
+                data:
+                  room: erg_fysikon
+            - type: button
+              name: "Reset"
+              icon: mdi:timer-off
+              tap_action:
+                action: call-service
+                service: script.chronos_timer_reset
+                data:
+                  room: erg_fysikon
+    - type: vertical-stack
+      cards:
+        - type: entities
+          title: "📨 Μήνυμα προς Διευθυντή"
+          entities:
+            - entity: input_text.chronos_erg_fysikon_director_msg
+              name: "Μήνυμα"
+        - type: button
+          name: "Αποστολή στον Διευθυντή"
+          icon: mdi:email-fast
+          tap_action:
+            action: call-service
+            service: script.chronos_send_director
+            data:
+              room: erg_fysikon
+              room_name: "Εργαστήριο Φυσικών Επιστημών"
+    - type: vertical-stack
+      cards:
+        - type: entities
+          title: "🔊 Εκφώνηση (TTS Google)"
+          entities:
+            - entity: input_text.chronos_erg_fysikon_tts_msg
+              name: "Κείμενο"
+        - type: button
+          name: "Εκφώνηση"
+          icon: mdi:text-to-speech
+          tap_action:
+            action: call-service
+            service: script.chronos_say_tts
+            data:
+              room: erg_fysikon
+              media_player: media_player.chronos_erg_fysikon_speaker
+    - type: markdown
+      content: "#### 🔊 Media Player Τάξης"
+    - type: conditional
+      conditions:
+        - entity: media_player.chronos_erg_fysikon_speaker
+          state_not: "unavailable"
+      card:
+        type: media-control
+        entity: media_player.chronos_erg_fysikon_speaker
+    - type: conditional
+      conditions:
+        - entity: media_player.chronos_erg_fysikon_speaker
+          state: "unavailable"
+      card:
+        type: markdown
+        content: "⚠️ Ο player της οθόνης δεν είναι ενεργός. Όρισε στο Browser Mod BrowserID = `erg_fysikon` (δες οδηγίες)."
+    - type: entities
+      title: "📡 Κατάσταση Σταθμών & Αισθητήρων"
+      entities:
+        - entity: binary_sensor.chronos_erg_fysikon_fire
+          name: "Πυρανίχνευση"
+        - entity: binary_sensor.chronos_erg_fysikon_audio_station
+          name: "Ηχητικός Σταθμός"
+        - entity: binary_sensor.chronos_erg_fysikon_visual_station
+          name: "Οπτικός Σταθμός"
+    - type: entities
+      title: "🧪 Προσομοίωση (SIM)"
+      entities:
+        - entity: input_boolean.chronos_erg_fysikon_sim_fire
+          name: "Φωτιά (SIM)"
+        - entity: input_boolean.chronos_erg_fysikon_sim_audio_online
+          name: "Ηχ. online (SIM)"
+        - entity: input_boolean.chronos_erg_fysikon_sim_visual_online
+          name: "Οπτ. online (SIM)"

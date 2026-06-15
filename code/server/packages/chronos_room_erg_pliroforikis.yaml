@@ -1,0 +1,75 @@
+# ===== CHRONOS – ΑΙΘΟΥΣΑ: Εργαστήριο Πληροφορικής (erg_pliroforikis) =====
+# Helpers + αισθητήρες + media_player ΑΥΤΗΣ της αίθουσας.
+
+input_boolean:
+  chronos_erg_pliroforikis_audio_enable:
+    name: "Εργαστήριο Πληροφορικής – Ηχητικός Σταθμός (enable)"
+    icon: mdi:volume-high
+  chronos_erg_pliroforikis_visual_enable:
+    name: "Εργαστήριο Πληροφορικής – Οπτικός Σταθμός (enable)"
+    icon: mdi:monitor
+  chronos_erg_pliroforikis_sim_fire:
+    name: "Εργαστήριο Πληροφορικής – [SIM] Πυρανίχνευση"
+    icon: mdi:fire
+  chronos_erg_pliroforikis_sim_audio_online:
+    name: "Εργαστήριο Πληροφορικής – [SIM] Ηχητικός σταθμός online"
+    icon: mdi:speaker
+  chronos_erg_pliroforikis_sim_visual_online:
+    name: "Εργαστήριο Πληροφορικής – [SIM] Οπτικός σταθμός online"
+    icon: mdi:television
+
+input_number:
+  chronos_erg_pliroforikis_timer_minutes:
+    name: "Εργαστήριο Πληροφορικής – Λεπτά αντίστροφης μέτρησης"
+    min: 1
+    max: 120
+    step: 1
+    initial: 5
+    unit_of_measurement: min
+    icon: mdi:timer-cog
+
+timer:
+  chronos_erg_pliroforikis_countdown:
+    name: "Εργαστήριο Πληροφορικής – Αντίστροφη Μέτρηση"
+    restore: true
+
+input_text:
+  chronos_erg_pliroforikis_director_msg:
+    name: "Εργαστήριο Πληροφορικής – Μήνυμα προς Διευθυντή"
+    max: 255
+    icon: mdi:email-fast
+  chronos_erg_pliroforikis_tts_msg:
+    name: "Εργαστήριο Πληροφορικής – Κείμενο για εκφώνηση"
+    max: 255
+    icon: mdi:text-to-speech
+
+media_player:
+  - platform: universal
+    name: chronos_erg_pliroforikis_speaker
+    unique_id: chronos_erg_pliroforikis_speaker
+    children:
+      - media_player.erg_pliroforikis
+    device_class: speaker
+
+template:
+  - sensor:
+      - name: chronos_erg_pliroforikis_quote
+        unique_id: chronos_erg_pliroforikis_quote_tpl
+        state: >
+          {% set q = state_attr('input_select.chronos_quotes','options') %}
+          {% set idx = ((now().timestamp() // 3600) | int) + 10 %}
+          {{ q[idx % (q | length)] if q else '' }}
+  - binary_sensor:
+      - name: chronos_erg_pliroforikis_fire
+        unique_id: chronos_erg_pliroforikis_fire_tpl
+        device_class: smoke
+        state: "{{ is_state('input_boolean.chronos_erg_pliroforikis_sim_fire','on') }}"
+      - name: chronos_erg_pliroforikis_audio_station
+        unique_id: chronos_erg_pliroforikis_audio_station_tpl
+        device_class: connectivity
+        state: "{{ is_state('input_boolean.chronos_erg_pliroforikis_sim_audio_online','on') }}"
+      - name: chronos_erg_pliroforikis_visual_station
+        unique_id: chronos_erg_pliroforikis_visual_station_tpl
+        device_class: connectivity
+        state: "{{ is_state('input_boolean.chronos_erg_pliroforikis_sim_visual_online','on') }}"
+

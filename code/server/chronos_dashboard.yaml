@@ -1,0 +1,3 @@
+# CHRONOS – κύριο dashboard (YAML mode). Οι όψεις φορτώνονται από φάκελο.
+title: Chronos
+views: !include_dir_merge_list chronos_views/

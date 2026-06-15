@@ -1,0 +1,507 @@
+# ===== CHRONOS – COMMON PACKAGE =====
+# Κοινά για όλο το σχολείο: masters, tts, notify, input_select,
+# schedule, μετρητής συναγερμών, ΟΛΑ τα scripts & automations.
+
+input_boolean:
+  chronos_mqtt_enabled:
+    name: "Chronos – Χρήση MQTT (σταθμοί ενεργοί)"
+    icon: mdi:transit-connection-variant
+  chronos_bells_master_enable:
+    name: "Chronos – Κεντρική ενεργοποίηση κουδουνιών"
+    icon: mdi:bell-ring
+  chronos_music_master_enable:
+    name: "Chronos – Κεντρική ενεργοποίηση μουσικής"
+    icon: mdi:music
+  chronos_emergency:
+    name: "Chronos – Κατάσταση Έκτακτης Ανάγκης"
+    icon: mdi:alarm-light
+
+input_select:
+  chronos_music_track:
+    name: "Chronos – Επιλογή μουσικού κομματιού"
+    icon: mdi:playlist-music
+    options:
+      - "music_calm_01.mp3"
+      - "music_calm_02.mp3"
+      - "music_upbeat_01.mp3"
+      - "announce_jingle.mp3"
+  chronos_bell_sound:
+    name: "Chronos – Ήχος κουδουνιού (default)"
+    icon: mdi:bell-cog
+    options:
+      - "bell_start.mp3"
+      - "bell_break.mp3"
+      - "bell_end.mp3"
+  chronos_quotes:
+    name: "Chronos – Ρητά (από αρχείο)"
+    icon: mdi:format-quote-close
+    # Τα ρητά φορτώνονται από ξεχωριστό αρχείο:
+    options: !include chronos/quotes_list.yaml
+
+schedule:
+  chronos_bell_schedule:
+    name: "Πρόγραμμα Κουδουνιού (εβδομαδιαίο)"
+    icon: mdi:calendar-clock
+    monday:
+      - from: "08:15:00"
+        to: "13:50:00"
+    tuesday:
+      - from: "08:15:00"
+        to: "13:50:00"
+    wednesday:
+      - from: "08:15:00"
+        to: "13:50:00"
+    thursday:
+      - from: "08:15:00"
+        to: "13:50:00"
+    friday:
+      - from: "08:15:00"
+        to: "13:50:00"
+  chronos_music_schedule:
+    name: "Πρόγραμμα Μουσικής (εβδομαδιαίο)"
+    icon: mdi:calendar-music
+    monday:
+      - from: "11:00:00"
+        to: "11:15:00"
+    tuesday:
+      - from: "11:00:00"
+        to: "11:15:00"
+    wednesday:
+      - from: "11:00:00"
+        to: "11:15:00"
+    thursday:
+      - from: "11:00:00"
+        to: "11:15:00"
+    friday:
+      - from: "11:00:00"
+        to: "11:15:00"
+
+tts:
+  - platform: google_translate
+    language: el
+
+template:
+  - sensor:
+      - name: chronos_active_fire_count
+        unique_id: chronos_active_fire_count_tpl
+        icon: mdi:fire-alert
+        state: >
+          {% set s = [
+            states('binary_sensor.chronos_grafeio_diefthynti_fire'),
+            states('binary_sensor.chronos_grafeio_kathigiton_fire'),
+            states('binary_sensor.chronos_aithousa_ekdiloseon_fire'),
+            states('binary_sensor.chronos_b_lykeiou_fire'),
+            states('binary_sensor.chronos_g_lykeiou_oik_plir_fire'),
+            states('binary_sensor.chronos_g_lykeiou_theor_fire'),
+            states('binary_sensor.chronos_a_gymnasiou_fire'),
+            states('binary_sensor.chronos_b_gymnasiou_fire'),
+            states('binary_sensor.chronos_g_gymnasiou_fire'),
+            states('binary_sensor.chronos_a_lykeiou_fire'),
+            states('binary_sensor.chronos_erg_pliroforikis_fire'),
+            states('binary_sensor.chronos_erg_fysikon_fire')
+          ] %}
+          {{ s | select('eq','on') | list | count }}
+
+script:
+  chronos_timer_toggle:
+    alias: "Chronos – Timer Start/Pause"
+    fields: { room: {} }
+    sequence:
+      - variables:
+          timer_entity: "timer.chronos_{{ room }}_countdown"
+          minutes_entity: "input_number.chronos_{{ room }}_timer_minutes"
+      - choose:
+          - conditions: "{{ states(timer_entity) == 'active' }}"
+            sequence:
+              - service: timer.pause
+                target: { entity_id: "{{ timer_entity }}" }
+          - conditions: "{{ states(timer_entity) == 'paused' }}"
+            sequence:
+              - service: timer.start
+                target: { entity_id: "{{ timer_entity }}" }
+        default:
+          - service: timer.start
+            target: { entity_id: "{{ timer_entity }}" }
+            data:
+              duration: >
+                {% set m = states(minutes_entity) | int(5) %}
+                {{ '%02d:%02d:00' % (m // 60, m % 60) }}
+  chronos_timer_reset:
+    alias: "Chronos – Timer Reset"
+    fields: { room: {} }
+    sequence:
+      - service: timer.cancel
+        target: { entity_id: "timer.chronos_{{ room }}_countdown" }
+  chronos_send_director:
+    alias: "Chronos – Αποστολή μηνύματος στον Διευθυντή"
+    fields: { room: {}, room_name: {} }
+    sequence:
+      - variables:
+          msg_entity: "input_text.chronos_{{ room }}_director_msg"
+          msg: "{{ states('input_text.chronos_' ~ room ~ '_director_msg') }}"
+      - condition: template
+        value_template: "{{ msg | trim | length > 0 }}"
+      # (Προαιρετικό) Καταγραφή σε ΑΡΧΕΙΟ: πρόσθεσε από UI το integration 'File'
+      # (Settings -> Devices & Services -> Add Integration -> File -> Notifier),
+      # που δημιουργεί notify.chronos_log, και ξεσχολίασε τις 3 γραμμές:
+      # - action: notify.send_message
+      #   target: { entity_id: notify.chronos_log }
+      #   data: { message: "{{ room_name }} | {{ msg }}" }
+      - service: logbook.log
+        data:
+          name: "📨 Μήνυμα προς Διευθυντή"
+          message: "{{ room_name }}: {{ msg }}"
+          entity_id: "{{ msg_entity }}"
+      - service: persistent_notification.create
+        data:
+          title: "📨 Μήνυμα από {{ room_name }}"
+          message: "{{ msg }}"
+          notification_id: "chronos_msg_{{ room }}"
+      - service: input_text.set_value
+        target: { entity_id: "{{ msg_entity }}" }
+        data: { value: "" }
+  chronos_say_tts:
+    alias: "Chronos – Εκφώνηση κειμένου (TTS)"
+    fields: { room: {}, media_player: {} }
+    sequence:
+      - variables:
+          text: "{{ states('input_text.chronos_' ~ room ~ '_tts_msg') }}"
+      - condition: template
+        value_template: "{{ text | trim | length > 0 }}"
+      - service: tts.google_translate_say
+        data:
+          entity_id: "{{ media_player }}"
+          message: "{{ text }}"
+          language: el
+  chronos_ring_bell:
+    alias: "Chronos – Κωδωνοκρουσία"
+    fields: { sound: {} }
+    sequence:
+      - condition: state
+        entity_id: input_boolean.chronos_bells_master_enable
+        state: "on"
+      - variables:
+          snd: "{{ sound | default(states('input_select.chronos_bell_sound')) }}"
+          rooms:
+            [
+              grafeio_diefthynti,
+              grafeio_kathigiton,
+              aithousa_ekdiloseon,
+              b_lykeiou,
+              g_lykeiou_oik_plir,
+              g_lykeiou_theor,
+              a_gymnasiou,
+              b_gymnasiou,
+              g_gymnasiou,
+              a_lykeiou,
+              erg_pliroforikis,
+              erg_fysikon,
+            ]
+      - repeat:
+          for_each: "{{ rooms }}"
+          sequence:
+            - if:
+                - condition: template
+                  value_template: "{{ is_state('input_boolean.chronos_' ~ repeat.item ~ '_audio_enable','on') }}"
+              then:
+                - choose:
+                    - conditions: "{{ is_state('input_boolean.chronos_mqtt_enabled','on') }}"
+                      sequence:
+                        - service: mqtt.publish
+                          data:
+                            topic: "chronos/{{ repeat.item }}/audio/play"
+                            payload: "{{ snd }}"
+                  default:
+                    - service: logbook.log
+                      data:
+                        name: "🔔 Κουδούνι (SIM)"
+                        message: "Ήχος {{ snd }} -> {{ repeat.item }}"
+                    - if:
+                        - condition: template
+                          value_template: "{{ states('media_player.chronos_' ~ repeat.item ~ '_speaker') not in ['unknown','unavailable'] }}"
+                      then:
+                        - service: media_player.play_media
+                          target:
+                            {
+                              entity_id: "media_player.chronos_{{ repeat.item }}_speaker",
+                            }
+                          data:
+                            media_content_id: "media-source://media_source/local/chronos/{{ snd }}"
+                            media_content_type: music
+  chronos_play_music:
+    alias: "Chronos – Αναπαραγωγή μουσικής"
+    sequence:
+      - condition: state
+        entity_id: input_boolean.chronos_music_master_enable
+        state: "on"
+      - variables:
+          track: "{{ states('input_select.chronos_music_track') }}"
+          rooms:
+            [
+              grafeio_diefthynti,
+              grafeio_kathigiton,
+              aithousa_ekdiloseon,
+              b_lykeiou,
+              g_lykeiou_oik_plir,
+              g_lykeiou_theor,
+              a_gymnasiou,
+              b_gymnasiou,
+              g_gymnasiou,
+              a_lykeiou,
+              erg_pliroforikis,
+              erg_fysikon,
+            ]
+      - repeat:
+          for_each: "{{ rooms }}"
+          sequence:
+            - if:
+                - condition: template
+                  value_template: "{{ is_state('input_boolean.chronos_' ~ repeat.item ~ '_audio_enable','on') }}"
+              then:
+                - choose:
+                    - conditions: "{{ is_state('input_boolean.chronos_mqtt_enabled','on') }}"
+                      sequence:
+                        - service: mqtt.publish
+                          data:
+                            topic: "chronos/{{ repeat.item }}/audio/music"
+                            payload: "{{ track }}"
+                  default:
+                    - service: logbook.log
+                      data:
+                        name: "🎵 Μουσική (SIM)"
+                        message: "Κομμάτι {{ track }} -> {{ repeat.item }}"
+                    - if:
+                        - condition: template
+                          value_template: "{{ states('media_player.chronos_' ~ repeat.item ~ '_speaker') not in ['unknown','unavailable'] }}"
+                      then:
+                        - service: media_player.play_media
+                          target:
+                            {
+                              entity_id: "media_player.chronos_{{ repeat.item }}_speaker",
+                            }
+                          data:
+                            media_content_id: "media-source://media_source/local/chronos/{{ track }}"
+                            media_content_type: music
+  chronos_stop_music:
+    alias: "Chronos – Διακοπή μουσικής"
+    sequence:
+      - variables:
+          {
+            rooms:
+              [
+                grafeio_diefthynti,
+                grafeio_kathigiton,
+                aithousa_ekdiloseon,
+                b_lykeiou,
+                g_lykeiou_oik_plir,
+                g_lykeiou_theor,
+                a_gymnasiou,
+                b_gymnasiou,
+                g_gymnasiou,
+                a_lykeiou,
+                erg_pliroforikis,
+                erg_fysikon,
+              ],
+          }
+      - repeat:
+          for_each: "{{ rooms }}"
+          sequence:
+            - choose:
+                - conditions: "{{ is_state('input_boolean.chronos_mqtt_enabled','on') }}"
+                  sequence:
+                    - service: mqtt.publish
+                      data:
+                        topic: "chronos/{{ repeat.item }}/audio/stop"
+                        payload: "stop"
+              default:
+                - if:
+                    - condition: template
+                      value_template: "{{ states('media_player.chronos_' ~ repeat.item ~ '_speaker') not in ['unknown','unavailable'] }}"
+                  then:
+                    - service: media_player.media_stop
+                      target:
+                        {
+                          entity_id: "media_player.chronos_{{ repeat.item }}_speaker",
+                        }
+
+automation:
+  - id: chronos_bell_from_calendar
+    alias: "Chronos – Κουδούνι από Ημερολόγιο"
+    trigger:
+      - platform: calendar
+        event: start
+        entity_id: calendar.kodonokrousies
+    action:
+      - variables: { summary: "{{ trigger.calendar_event.summary | lower }}" }
+      - service: script.chronos_ring_bell
+        data:
+          sound: >
+            {% if 'διάλειμμα' in summary or 'break' in summary %} bell_break.mp3
+            {% elif 'λήξη' in summary or 'end' in summary %} bell_end.mp3
+            {% else %} bell_start.mp3 {% endif %}
+  - id: chronos_bell_from_schedule
+    alias: "Chronos – Κουδούνι από Εβδομαδιαίο Πρόγραμμα"
+    trigger:
+      - platform: state
+        entity_id: schedule.chronos_bell_schedule
+        to: "on"
+        id: start
+      - platform: state
+        entity_id: schedule.chronos_bell_schedule
+        to: "off"
+        id: end
+    action:
+      - choose:
+          - conditions: "{{ trigger.id == 'start' }}"
+            sequence:
+              - service: script.chronos_ring_bell
+                data: { sound: bell_start.mp3 }
+        default:
+          - service: script.chronos_ring_bell
+            data: { sound: bell_end.mp3 }
+  - id: chronos_music_from_schedule
+    alias: "Chronos – Μουσική από Εβδομαδιαίο Πρόγραμμα"
+    trigger:
+      - platform: state
+        entity_id: schedule.chronos_music_schedule
+        to: "on"
+        id: mon
+      - platform: state
+        entity_id: schedule.chronos_music_schedule
+        to: "off"
+        id: moff
+    action:
+      - choose:
+          - conditions: "{{ trigger.id == 'mon' }}"
+            sequence:
+              - service: script.chronos_play_music
+        default:
+          - service: script.chronos_stop_music
+  - id: chronos_fire_escalation
+    alias: "Chronos – Κλιμάκωση Πυρανίχνευσης"
+    trigger:
+      - platform: state
+        entity_id: binary_sensor.chronos_grafeio_diefthynti_fire
+        to: "on"
+      - platform: state
+        entity_id: binary_sensor.chronos_grafeio_kathigiton_fire
+        to: "on"
+      - platform: state
+        entity_id: binary_sensor.chronos_aithousa_ekdiloseon_fire
+        to: "on"
+      - platform: state
+        entity_id: binary_sensor.chronos_b_lykeiou_fire
+        to: "on"
+      - platform: state
+        entity_id: binary_sensor.chronos_g_lykeiou_oik_plir_fire
+        to: "on"
+      - platform: state
+        entity_id: binary_sensor.chronos_g_lykeiou_theor_fire
+        to: "on"
+      - platform: state
+        entity_id: binary_sensor.chronos_a_gymnasiou_fire
+        to: "on"
+      - platform: state
+        entity_id: binary_sensor.chronos_b_gymnasiou_fire
+        to: "on"
+      - platform: state
+        entity_id: binary_sensor.chronos_g_gymnasiou_fire
+        to: "on"
+      - platform: state
+        entity_id: binary_sensor.chronos_a_lykeiou_fire
+        to: "on"
+      - platform: state
+        entity_id: binary_sensor.chronos_erg_pliroforikis_fire
+        to: "on"
+      - platform: state
+        entity_id: binary_sensor.chronos_erg_fysikon_fire
+        to: "on"
+    action:
+      - variables:
+          ent: "{{ trigger.to_state.entity_id }}"
+          room_id: "{{ ent.split('.')[1] | replace('chronos_','') | replace('_fire','') }}"
+          names:
+            grafeio_diefthynti: "Γραφείο Διευθυντή"
+            grafeio_kathigiton: "Γραφείο Καθηγητών"
+            aithousa_ekdiloseon: "Αίθουσα Εκδηλώσεων"
+            b_lykeiou: "Β΄ Λυκείου"
+            g_lykeiou_oik_plir: "Γ΄ Λυκείου Οικ. & Πληροφορικής"
+            g_lykeiou_theor: "Γ΄ Λυκείου Θεωρητική"
+            a_gymnasiou: "Α΄ Γυμνασίου"
+            b_gymnasiou: "Β΄ Γυμνασίου"
+            g_gymnasiou: "Γ΄ Γυμνασίου"
+            a_lykeiou: "Α΄ Λυκείου"
+            erg_pliroforikis: "Εργαστήριο Πληροφορικής"
+            erg_fysikon: "Εργαστήριο Φυσικών Επιστημών"
+          room_name: "{{ names[room_id] | default(room_id) }}"
+      - service: input_boolean.turn_on
+        target: { entity_id: input_boolean.chronos_emergency }
+      - service: logbook.log
+        data:
+          name: "🔥 ΠΥΡΑΝΙΧΝΕΥΣΗ"
+          message: "Συναγερμός: {{ room_name }}"
+      - service: persistent_notification.create
+        data:
+          title: "🔥 ΠΥΡΑΝΙΧΝΕΥΣΗ"
+          message: "Ανιχνεύθηκε καπνός/φωτιά: {{ room_name }}"
+          notification_id: "chronos_fire"
+      # Εικόνα fullscreen με το όνομα της αίθουσας σε ΟΛΕΣ τις οθόνες (Browser Mod)
+      - service: persistent_notification.create
+        data:
+          title: "DEBUG εικόνας"
+          message: >
+            room_name: {{ room_name }}
+            room_id: {{ room_id }}
+            image_path: /local/chronos/rooms/alarm/{{ room_id }}.jpg
+      - service: browser_mod.popup
+        data:
+          title: "🔥 ΕΚΚΕΝΩΣΗ — {{ room_name }}"
+          timeout: 30000
+          right_button: "OK"
+          content:
+            type: picture
+            image: "/local/chronos/rooms/alarm/test.jpg"
+          style: |
+            --popup-min-width: 33vw;
+            --popup-max-width: 33vw;
+      - service: script.chronos_ring_bell
+        data: { sound: alarm_fire.mp3 }
+  - id: chronos_emergency_cleared
+    alias: "Chronos – Λήξη Έκτακτης Ανάγκης"
+    trigger:
+      - platform: state
+        entity_id: input_boolean.chronos_emergency
+        to: "off"
+    action:
+      - service: persistent_notification.dismiss
+        data: { notification_id: "chronos_fire" }
+      - service: browser_mod.close_popup
+      - service: logbook.log
+        data:
+          {
+            name: "✅ Λήξη Συναγερμού",
+            message: "Η έκτακτη ανάγκη τερματίστηκε.",
+          }
+  - id: chronos_timer_finished_sound
+    alias: "Chronos – Ήχος λήξης αντίστροφης μέτρησης"
+    trigger:
+      - platform: event
+        event_type: timer.finished
+    condition:
+      - condition: template
+        value_template: "{{ trigger.event.data.entity_id.startswith('timer.chronos_') }}"
+    action:
+      - variables:
+          room: "{{ trigger.event.data.entity_id | replace('timer.chronos_','') | replace('_countdown','') }}"
+          mp: "media_player.chronos_{{ room }}_speaker"
+      - service: logbook.log
+        data: { name: "⏱️ Λήξη χρόνου", message: "{{ room }}" }
+      - if:
+          - condition: template
+            value_template: "{{ states(mp) not in ['unknown','unavailable'] }}"
+        then:
+          - service: media_player.play_media
+            target: { entity_id: "{{ mp }}" }
+            data:
+              media_content_id: "media-source://media_source/local/chronos/timer_end.mp3"
+              media_content_type: music

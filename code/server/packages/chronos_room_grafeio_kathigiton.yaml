@@ -1,0 +1,75 @@
+# ===== CHRONOS – ΑΙΘΟΥΣΑ: Γραφείο Καθηγητών (grafeio_kathigiton) =====
+# Helpers + αισθητήρες + media_player ΑΥΤΗΣ της αίθουσας.
+
+input_boolean:
+  chronos_grafeio_kathigiton_audio_enable:
+    name: "Γραφείο Καθηγητών – Ηχητικός Σταθμός (enable)"
+    icon: mdi:volume-high
+  chronos_grafeio_kathigiton_visual_enable:
+    name: "Γραφείο Καθηγητών – Οπτικός Σταθμός (enable)"
+    icon: mdi:monitor
+  chronos_grafeio_kathigiton_sim_fire:
+    name: "Γραφείο Καθηγητών – [SIM] Πυρανίχνευση"
+    icon: mdi:fire
+  chronos_grafeio_kathigiton_sim_audio_online:
+    name: "Γραφείο Καθηγητών – [SIM] Ηχητικός σταθμός online"
+    icon: mdi:speaker
+  chronos_grafeio_kathigiton_sim_visual_online:
+    name: "Γραφείο Καθηγητών – [SIM] Οπτικός σταθμός online"
+    icon: mdi:television
+
+input_number:
+  chronos_grafeio_kathigiton_timer_minutes:
+    name: "Γραφείο Καθηγητών – Λεπτά αντίστροφης μέτρησης"
+    min: 1
+    max: 120
+    step: 1
+    initial: 5
+    unit_of_measurement: min
+    icon: mdi:timer-cog
+
+timer:
+  chronos_grafeio_kathigiton_countdown:
+    name: "Γραφείο Καθηγητών – Αντίστροφη Μέτρηση"
+    restore: true
+
+input_text:
+  chronos_grafeio_kathigiton_director_msg:
+    name: "Γραφείο Καθηγητών – Μήνυμα προς Διευθυντή"
+    max: 255
+    icon: mdi:email-fast
+  chronos_grafeio_kathigiton_tts_msg:
+    name: "Γραφείο Καθηγητών – Κείμενο για εκφώνηση"
+    max: 255
+    icon: mdi:text-to-speech
+
+media_player:
+  - platform: universal
+    name: chronos_grafeio_kathigiton_speaker
+    unique_id: chronos_grafeio_kathigiton_speaker
+    children:
+      - media_player.grafeio_kathigiton
+    device_class: speaker
+
+template:
+  - sensor:
+      - name: chronos_grafeio_kathigiton_quote
+        unique_id: chronos_grafeio_kathigiton_quote_tpl
+        state: >
+          {% set q = state_attr('input_select.chronos_quotes','options') %}
+          {% set idx = ((now().timestamp() // 3600) | int) + 1 %}
+          {{ q[idx % (q | length)] if q else '' }}
+  - binary_sensor:
+      - name: chronos_grafeio_kathigiton_fire
+        unique_id: chronos_grafeio_kathigiton_fire_tpl
+        device_class: smoke
+        state: "{{ is_state('input_boolean.chronos_grafeio_kathigiton_sim_fire','on') }}"
+      - name: chronos_grafeio_kathigiton_audio_station
+        unique_id: chronos_grafeio_kathigiton_audio_station_tpl
+        device_class: connectivity
+        state: "{{ is_state('input_boolean.chronos_grafeio_kathigiton_sim_audio_online','on') }}"
+      - name: chronos_grafeio_kathigiton_visual_station
+        unique_id: chronos_grafeio_kathigiton_visual_station_tpl
+        device_class: connectivity
+        state: "{{ is_state('input_boolean.chronos_grafeio_kathigiton_sim_visual_online','on') }}"
+

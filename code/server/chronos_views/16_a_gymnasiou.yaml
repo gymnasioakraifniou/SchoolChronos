@@ -1,0 +1,158 @@
+- title: Α΄ Γυμνασίου
+  path: a_gymnasiou
+  icon: mdi:school-outline
+  type: panel # <--- ΑΥΤΟ ακυρώνει την δίπλωση προς τα δεξιά και δίνει όλο το πλάτος
+  cards:
+    - type: vertical-stack # <--- Όλο το Dashboard σε μία κάθετη στήλη
+      cards:
+        # ═══════════════════════════════════════════════════════
+        # ΓΡΑΜΜΗ 1 — Τίτλος
+        # ═══════════════════════════════════════════════════════
+        - type: markdown
+          content: "# 🏫 Α΄ Γυμνασίου"
+
+        # ═══════════════════════════════════════════════════════
+        # ΓΡΑΜΜΗ 2 — 3 ίσες στήλες
+        # ═══════════════════════════════════════════════════════
+        - type: grid
+          columns: 3
+          square: false
+          cards:
+            # ── Στήλη 1: Ρητό + Εικόνα Τάξης ──
+            - type: vertical-stack
+              cards:
+                - type: markdown
+                  content: >
+                    <div style="font-family: 'Brush Script MT', 'Lucida Handwriting', 'Segoe Script', 'Comic Sans MS', cursive;
+                    font-size: 64px; font-style: italic; text-align: center; padding: 12px;
+                    color: var(--primary-text-color);">
+                      <br><br>
+                      « {{ states('sensor.chronos_a_gymnasiou_quote') }} »
+                      <br><br><br>
+                    </div>
+                - type: picture
+                  image: /local/chronos/rooms/a_gymnasiou.jpg
+
+            # ── Στήλη 2: Μήνυμα + Αποστολή Διευθυντή ──
+            - type: vertical-stack
+              cards:
+                - type: entities
+                  title: "📨 Μήνυμα προς Διευθυντή"
+                  entities:
+                    - entity: input_text.chronos_a_gymnasiou_director_msg
+                      name: "Μήνυμα"
+                - type: button
+                  name: "Αποστολή στον Διευθυντή"
+                  icon: mdi:email-fast
+                  tap_action:
+                    action: call-service
+                    service: script.chronos_send_director
+                    data:
+                      room: a_gymnasiou
+                      room_name: "Α΄ Γυμνασίου"
+
+            # ── Στήλη 3: TTS Κείμενο + Πλήκτρο Εκφώνησης ──
+            - type: vertical-stack
+              cards:
+                - type: entities
+                  title: "🔊 Εκφώνηση (TTS Google)"
+                  entities:
+                    - entity: input_text.chronos_a_gymnasiou_tts_msg
+                      name: "Κείμενο"
+                - type: picture
+                  image: /local/chronos/tts_button.jpg
+                  tap_action:
+                    action: call-service
+                    service: script.chronos_say_tts
+                    data:
+                      room: a_gymnasiou
+                      media_player: media_player.chronos_a_gymnasiou_speaker
+
+        # ═══════════════════════════════════════════════════════
+        # ΓΡΑΜΜΗ 3 — 3 ίσες στήλες
+        # ═══════════════════════════════════════════════════════
+        - type: grid
+          columns: 3
+          square: false
+          cards:
+            # ── Στήλη 1: Προσομοίωση (SIM) ──
+            - type: entities
+              title: "🧪 Προσομοίωση (SIM)"
+              entities:
+                - entity: input_boolean.chronos_a_gymnasiou_sim_fire
+                  name: "Φωτιά (SIM)"
+                - entity: input_boolean.chronos_a_gymnasiou_sim_audio_online
+                  name: "Ηχ. online (SIM)"
+                - entity: input_boolean.chronos_a_gymnasiou_sim_visual_online
+                  name: "Οπτ. online (SIM)"
+
+            # ── Στήλη 2: Σταθμοί Ειδοποίησης + Αισθητήρες ──
+            - type: vertical-stack
+              cards:
+                - type: entities
+                  title: "📡 Σταθμοί Ειδοποίησης"
+                  entities:
+                    - entity: input_boolean.chronos_a_gymnasiou_audio_enable
+                      name: "Ηχητική Ειδοποίηση"
+                    - entity: input_boolean.chronos_a_gymnasiou_visual_enable
+                      name: "Οπτική Ειδοποίηση"
+                - type: entities
+                  title: "📡 Κατάσταση Σταθμών"
+                  entities:
+                    - entity: binary_sensor.chronos_a_gymnasiou_fire
+                      name: "Πυρανίχνευση"
+                    - entity: binary_sensor.chronos_a_gymnasiou_audio_station
+                      name: "Ηχητικός Σταθμός"
+                    - entity: binary_sensor.chronos_a_gymnasiou_visual_station
+                      name: "Οπτικός Σταθμός"
+
+            # ── Στήλη 3: Αντίστροφη Μέτρηση + Πλήκτρα ──
+            - type: vertical-stack
+              cards:
+                - type: entities
+                  title: "⏱️ Αντίστροφη Μέτρηση"
+                  entities:
+                    - entity: input_number.chronos_a_gymnasiou_timer_minutes
+                      name: "Λεπτά"
+                    - entity: timer.chronos_a_gymnasiou_countdown
+                      name: "Χρονόμετρο"
+                - type: horizontal-stack
+                  cards:
+                    - type: button
+                      name: "Start / Pause"
+                      icon: mdi:play-pause
+                      tap_action:
+                        action: call-service
+                        service: script.chronos_timer_toggle
+                        data:
+                          room: a_gymnasiou
+                    - type: button
+                      name: "Reset"
+                      icon: mdi:timer-off
+                      tap_action:
+                        action: call-service
+                        service: script.chronos_timer_reset
+                        data:
+                          room: a_gymnasiou
+
+        # ═══════════════════════════════════════════════════════
+        # MEDIA PLAYER (Στο κάτω μέρος)
+        # ═══════════════════════════════════════════════════════
+        - type: markdown
+          content: "#### 🔊 Media Player Τάξης"
+
+        - type: conditional
+          conditions:
+            - entity: media_player.chronos_a_gymnasiou_speaker
+              state_not: "unavailable"
+          card:
+            type: media-control
+            entity: media_player.chronos_a_gymnasiou_speaker
+
+        - type: conditional
+          conditions:
+            - entity: media_player.chronos_a_gymnasiou_speaker
+              state: "unavailable"
+          card:
+            type: markdown
+            content: "⚠️ Ο player της οθόνης δεν είναι ενεργός. Όρισε στο Browser Mod BrowserID = `a_gymnasiou`."

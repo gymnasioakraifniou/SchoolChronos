@@ -1,0 +1,108 @@
+- title: Α΄ Λυκείου
+  path: a_lykeiou
+  icon: mdi:school
+  cards:
+    - type: markdown
+      content: "# 🏫 Α΄ Λυκείου"
+    - type: markdown
+      content: "> _{{ states('sensor.chronos_a_lykeiou_quote') }}_"
+    - type: picture
+      image: /local/chronos/rooms/a_lykeiou.jpg
+    - type: entities
+      title: "Σταθμοί Ειδοποίησης"
+      entities:
+        - entity: input_boolean.chronos_a_lykeiou_audio_enable
+        - entity: input_boolean.chronos_a_lykeiou_visual_enable
+    - type: vertical-stack
+      cards:
+        - type: entities
+          title: "⏱️ Αντίστροφη Μέτρηση"
+          entities:
+            - entity: input_number.chronos_a_lykeiou_timer_minutes
+              name: "Λεπτά"
+            - entity: timer.chronos_a_lykeiou_countdown
+              name: "Χρονόμετρο"
+        - type: horizontal-stack
+          cards:
+            - type: button
+              name: "Start / Pause"
+              icon: mdi:play-pause
+              tap_action:
+                action: call-service
+                service: script.chronos_timer_toggle
+                data:
+                  room: a_lykeiou
+            - type: button
+              name: "Reset"
+              icon: mdi:timer-off
+              tap_action:
+                action: call-service
+                service: script.chronos_timer_reset
+                data:
+                  room: a_lykeiou
+    - type: vertical-stack
+      cards:
+        - type: entities
+          title: "📨 Μήνυμα προς Διευθυντή"
+          entities:
+            - entity: input_text.chronos_a_lykeiou_director_msg
+              name: "Μήνυμα"
+        - type: button
+          name: "Αποστολή στον Διευθυντή"
+          icon: mdi:email-fast
+          tap_action:
+            action: call-service
+            service: script.chronos_send_director
+            data:
+              room: a_lykeiou
+              room_name: "Α΄ Λυκείου"
+    - type: vertical-stack
+      cards:
+        - type: entities
+          title: "🔊 Εκφώνηση (TTS Google)"
+          entities:
+            - entity: input_text.chronos_a_lykeiou_tts_msg
+              name: "Κείμενο"
+        - type: button
+          name: "Εκφώνηση"
+          icon: mdi:text-to-speech
+          tap_action:
+            action: call-service
+            service: script.chronos_say_tts
+            data:
+              room: a_lykeiou
+              media_player: media_player.chronos_a_lykeiou_speaker
+    - type: markdown
+      content: "#### 🔊 Media Player Τάξης"
+    - type: conditional
+      conditions:
+        - entity: media_player.chronos_a_lykeiou_speaker
+          state_not: "unavailable"
+      card:
+        type: media-control
+        entity: media_player.chronos_a_lykeiou_speaker
+    - type: conditional
+      conditions:
+        - entity: media_player.chronos_a_lykeiou_speaker
+          state: "unavailable"
+      card:
+        type: markdown
+        content: "⚠️ Ο player της οθόνης δεν είναι ενεργός. Όρισε στο Browser Mod BrowserID = `a_lykeiou` (δες οδηγίες)."
+    - type: entities
+      title: "📡 Κατάσταση Σταθμών & Αισθητήρων"
+      entities:
+        - entity: binary_sensor.chronos_a_lykeiou_fire
+          name: "Πυρανίχνευση"
+        - entity: binary_sensor.chronos_a_lykeiou_audio_station
+          name: "Ηχητικός Σταθμός"
+        - entity: binary_sensor.chronos_a_lykeiou_visual_station
+          name: "Οπτικός Σταθμός"
+    - type: entities
+      title: "🧪 Προσομοίωση (SIM)"
+      entities:
+        - entity: input_boolean.chronos_a_lykeiou_sim_fire
+          name: "Φωτιά (SIM)"
+        - entity: input_boolean.chronos_a_lykeiou_sim_audio_online
+          name: "Ηχ. online (SIM)"
+        - entity: input_boolean.chronos_a_lykeiou_sim_visual_online
+          name: "Οπτ. online (SIM)"

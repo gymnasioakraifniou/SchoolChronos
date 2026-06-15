@@ -1,0 +1,73 @@
+- title: Κωδωνοκρουσία
+  path: kodonokrousia
+  icon: mdi:bell-ring
+  cards:
+    - type: markdown
+      content: "# 🔔 Έξυπνη Κωδωνοκρουσία"
+    - type: entities
+      entities:
+        - entity: input_boolean.chronos_bells_master_enable
+        - entity: input_select.chronos_bell_sound
+    - type: markdown
+      content: "##### 📅 Εβδομαδιαίο πρόγραμμα (κλικ στο όνομα για επεξεργασία ωρών)"
+    - type: entities
+      entities:
+        - entity: schedule.chronos_bell_schedule
+          name: "Πρόγραμμα Κουδουνιού"
+    - type: calendar
+      title: "Ημερολόγιο Κουδουνιών (έκτακτες αλλαγές)"
+      entities:
+        - calendar.kodonokrousies
+    - type: entities
+      title: "Σε ποιους χώρους θα χτυπάει"
+      entities:
+        - entity: input_boolean.chronos_grafeio_diefthynti_audio_enable
+          name: "Γραφείο Διευθυντή"
+        - entity: input_boolean.chronos_grafeio_kathigiton_audio_enable
+          name: "Γραφείο Καθηγητών"
+        - entity: input_boolean.chronos_aithousa_ekdiloseon_audio_enable
+          name: "Αίθουσα Εκδηλώσεων"
+        - entity: input_boolean.chronos_b_lykeiou_audio_enable
+          name: "Β΄ Λυκείου"
+        - entity: input_boolean.chronos_g_lykeiou_oik_plir_audio_enable
+          name: "Γ΄ Λυκείου Οικ. & Πληροφορικής"
+        - entity: input_boolean.chronos_g_lykeiou_theor_audio_enable
+          name: "Γ΄ Λυκείου Θεωρητική"
+        - entity: input_boolean.chronos_a_gymnasiou_audio_enable
+          name: "Α΄ Γυμνασίου"
+        - entity: input_boolean.chronos_b_gymnasiou_audio_enable
+          name: "Β΄ Γυμνασίου"
+        - entity: input_boolean.chronos_g_gymnasiou_audio_enable
+          name: "Γ΄ Γυμνασίου"
+        - entity: input_boolean.chronos_a_lykeiou_audio_enable
+          name: "Α΄ Λυκείου"
+        - entity: input_boolean.chronos_erg_pliroforikis_audio_enable
+          name: "Εργαστήριο Πληροφορικής"
+        - entity: input_boolean.chronos_erg_fysikon_audio_enable
+          name: "Εργαστήριο Φυσικών Επιστημών"
+    - type: horizontal-stack
+      cards:
+        - type: button
+          name: "Έναρξη"
+          icon: mdi:bell
+          tap_action:
+            action: call-service
+            service: script.chronos_ring_bell
+            data:
+              sound: bell_start.mp3
+        - type: button
+          name: "Διάλειμμα"
+          icon: mdi:bell
+          tap_action:
+            action: call-service
+            service: script.chronos_ring_bell
+            data:
+              sound: bell_break.mp3
+        - type: button
+          name: "Λήξη"
+          icon: mdi:bell
+          tap_action:
+            action: call-service
+            service: script.chronos_ring_bell
+            data:
+              sound: bell_end.mp3

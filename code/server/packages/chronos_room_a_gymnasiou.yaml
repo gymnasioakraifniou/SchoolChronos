@@ -1,0 +1,75 @@
+# ===== CHRONOS – ΑΙΘΟΥΣΑ: Α΄ Γυμνασίου (a_gymnasiou) =====
+# Helpers + αισθητήρες + media_player ΑΥΤΗΣ της αίθουσας.
+
+input_boolean:
+  chronos_a_gymnasiou_audio_enable:
+    name: "Α΄ Γυμνασίου – Ηχητικός Σταθμός (enable)"
+    icon: mdi:volume-high
+  chronos_a_gymnasiou_visual_enable:
+    name: "Α΄ Γυμνασίου – Οπτικός Σταθμός (enable)"
+    icon: mdi:monitor
+  chronos_a_gymnasiou_sim_fire:
+    name: "Α΄ Γυμνασίου – [SIM] Πυρανίχνευση"
+    icon: mdi:fire
+  chronos_a_gymnasiou_sim_audio_online:
+    name: "Α΄ Γυμνασίου – [SIM] Ηχητικός σταθμός online"
+    icon: mdi:speaker
+  chronos_a_gymnasiou_sim_visual_online:
+    name: "Α΄ Γυμνασίου – [SIM] Οπτικός σταθμός online"
+    icon: mdi:television
+
+input_number:
+  chronos_a_gymnasiou_timer_minutes:
+    name: "Α΄ Γυμνασίου – Λεπτά αντίστροφης μέτρησης"
+    min: 1
+    max: 120
+    step: 1
+    initial: 5
+    unit_of_measurement: min
+    icon: mdi:timer-cog
+
+timer:
+  chronos_a_gymnasiou_countdown:
+    name: "Α΄ Γυμνασίου – Αντίστροφη Μέτρηση"
+    restore: true
+
+input_text:
+  chronos_a_gymnasiou_director_msg:
+    name: "Α΄ Γυμνασίου – Μήνυμα προς Διευθυντή"
+    max: 255
+    icon: mdi:email-fast
+  chronos_a_gymnasiou_tts_msg:
+    name: "Α΄ Γυμνασίου – Κείμενο για εκφώνηση"
+    max: 255
+    icon: mdi:text-to-speech
+
+media_player:
+  - platform: universal
+    name: chronos_a_gymnasiou_speaker
+    unique_id: chronos_a_gymnasiou_speaker
+    children:
+      - media_player.a_gymnasiou
+    device_class: speaker
+
+template:
+  - sensor:
+      - name: chronos_a_gymnasiou_quote
+        unique_id: chronos_a_gymnasiou_quote_tpl
+        state: >
+          {% set q = state_attr('input_select.chronos_quotes','options') %}
+          {% set idx = ((now().timestamp() // 3600) | int) + 6 %}
+          {{ q[idx % (q | length)] if q else '' }}
+  - binary_sensor:
+      - name: chronos_a_gymnasiou_fire
+        unique_id: chronos_a_gymnasiou_fire_tpl
+        device_class: smoke
+        state: "{{ is_state('input_boolean.chronos_a_gymnasiou_sim_fire','on') }}"
+      - name: chronos_a_gymnasiou_audio_station
+        unique_id: chronos_a_gymnasiou_audio_station_tpl
+        device_class: connectivity
+        state: "{{ is_state('input_boolean.chronos_a_gymnasiou_sim_audio_online','on') }}"
+      - name: chronos_a_gymnasiou_visual_station
+        unique_id: chronos_a_gymnasiou_visual_station_tpl
+        device_class: connectivity
+        state: "{{ is_state('input_boolean.chronos_a_gymnasiou_sim_visual_online','on') }}"
+

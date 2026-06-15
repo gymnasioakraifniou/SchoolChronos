@@ -1,0 +1,75 @@
+# ===== CHRONOS – ΑΙΘΟΥΣΑ: Εργαστήριο Φυσικών Επιστημών (erg_fysikon) =====
+# Helpers + αισθητήρες + media_player ΑΥΤΗΣ της αίθουσας.
+
+input_boolean:
+  chronos_erg_fysikon_audio_enable:
+    name: "Εργαστήριο Φυσικών Επιστημών – Ηχητικός Σταθμός (enable)"
+    icon: mdi:volume-high
+  chronos_erg_fysikon_visual_enable:
+    name: "Εργαστήριο Φυσικών Επιστημών – Οπτικός Σταθμός (enable)"
+    icon: mdi:monitor
+  chronos_erg_fysikon_sim_fire:
+    name: "Εργαστήριο Φυσικών Επιστημών – [SIM] Πυρανίχνευση"
+    icon: mdi:fire
+  chronos_erg_fysikon_sim_audio_online:
+    name: "Εργαστήριο Φυσικών Επιστημών – [SIM] Ηχητικός σταθμός online"
+    icon: mdi:speaker
+  chronos_erg_fysikon_sim_visual_online:
+    name: "Εργαστήριο Φυσικών Επιστημών – [SIM] Οπτικός σταθμός online"
+    icon: mdi:television
+
+input_number:
+  chronos_erg_fysikon_timer_minutes:
+    name: "Εργαστήριο Φυσικών Επιστημών – Λεπτά αντίστροφης μέτρησης"
+    min: 1
+    max: 120
+    step: 1
+    initial: 5
+    unit_of_measurement: min
+    icon: mdi:timer-cog
+
+timer:
+  chronos_erg_fysikon_countdown:
+    name: "Εργαστήριο Φυσικών Επιστημών – Αντίστροφη Μέτρηση"
+    restore: true
+
+input_text:
+  chronos_erg_fysikon_director_msg:
+    name: "Εργαστήριο Φυσικών Επιστημών – Μήνυμα προς Διευθυντή"
+    max: 255
+    icon: mdi:email-fast
+  chronos_erg_fysikon_tts_msg:
+    name: "Εργαστήριο Φυσικών Επιστημών – Κείμενο για εκφώνηση"
+    max: 255
+    icon: mdi:text-to-speech
+
+media_player:
+  - platform: universal
+    name: chronos_erg_fysikon_speaker
+    unique_id: chronos_erg_fysikon_speaker
+    children:
+      - media_player.erg_fysikon
+    device_class: speaker
+
+template:
+  - sensor:
+      - name: chronos_erg_fysikon_quote
+        unique_id: chronos_erg_fysikon_quote_tpl
+        state: >
+          {% set q = state_attr('input_select.chronos_quotes','options') %}
+          {% set idx = ((now().timestamp() // 3600) | int) + 11 %}
+          {{ q[idx % (q | length)] if q else '' }}
+  - binary_sensor:
+      - name: chronos_erg_fysikon_fire
+        unique_id: chronos_erg_fysikon_fire_tpl
+        device_class: smoke
+        state: "{{ is_state('input_boolean.chronos_erg_fysikon_sim_fire','on') }}"
+      - name: chronos_erg_fysikon_audio_station
+        unique_id: chronos_erg_fysikon_audio_station_tpl
+        device_class: connectivity
+        state: "{{ is_state('input_boolean.chronos_erg_fysikon_sim_audio_online','on') }}"
+      - name: chronos_erg_fysikon_visual_station
+        unique_id: chronos_erg_fysikon_visual_station_tpl
+        device_class: connectivity
+        state: "{{ is_state('input_boolean.chronos_erg_fysikon_sim_visual_online','on') }}"
+

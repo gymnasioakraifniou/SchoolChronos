@@ -1,0 +1,75 @@
+# ===== CHRONOS – ΑΙΘΟΥΣΑ: Β΄ Λυκείου (b_lykeiou) =====
+# Helpers + αισθητήρες + media_player ΑΥΤΗΣ της αίθουσας.
+
+input_boolean:
+  chronos_b_lykeiou_audio_enable:
+    name: "Β΄ Λυκείου – Ηχητικός Σταθμός (enable)"
+    icon: mdi:volume-high
+  chronos_b_lykeiou_visual_enable:
+    name: "Β΄ Λυκείου – Οπτικός Σταθμός (enable)"
+    icon: mdi:monitor
+  chronos_b_lykeiou_sim_fire:
+    name: "Β΄ Λυκείου – [SIM] Πυρανίχνευση"
+    icon: mdi:fire
+  chronos_b_lykeiou_sim_audio_online:
+    name: "Β΄ Λυκείου – [SIM] Ηχητικός σταθμός online"
+    icon: mdi:speaker
+  chronos_b_lykeiou_sim_visual_online:
+    name: "Β΄ Λυκείου – [SIM] Οπτικός σταθμός online"
+    icon: mdi:television
+
+input_number:
+  chronos_b_lykeiou_timer_minutes:
+    name: "Β΄ Λυκείου – Λεπτά αντίστροφης μέτρησης"
+    min: 1
+    max: 120
+    step: 1
+    initial: 5
+    unit_of_measurement: min
+    icon: mdi:timer-cog
+
+timer:
+  chronos_b_lykeiou_countdown:
+    name: "Β΄ Λυκείου – Αντίστροφη Μέτρηση"
+    restore: true
+
+input_text:
+  chronos_b_lykeiou_director_msg:
+    name: "Β΄ Λυκείου – Μήνυμα προς Διευθυντή"
+    max: 255
+    icon: mdi:email-fast
+  chronos_b_lykeiou_tts_msg:
+    name: "Β΄ Λυκείου – Κείμενο για εκφώνηση"
+    max: 255
+    icon: mdi:text-to-speech
+
+media_player:
+  - platform: universal
+    name: chronos_b_lykeiou_speaker
+    unique_id: chronos_b_lykeiou_speaker
+    children:
+      - media_player.b_lykeiou
+    device_class: speaker
+
+template:
+  - sensor:
+      - name: chronos_b_lykeiou_quote
+        unique_id: chronos_b_lykeiou_quote_tpl
+        state: >
+          {% set q = state_attr('input_select.chronos_quotes','options') %}
+          {% set idx = ((now().timestamp() // 3600) | int) + 3 %}
+          {{ q[idx % (q | length)] if q else '' }}
+  - binary_sensor:
+      - name: chronos_b_lykeiou_fire
+        unique_id: chronos_b_lykeiou_fire_tpl
+        device_class: smoke
+        state: "{{ is_state('input_boolean.chronos_b_lykeiou_sim_fire','on') }}"
+      - name: chronos_b_lykeiou_audio_station
+        unique_id: chronos_b_lykeiou_audio_station_tpl
+        device_class: connectivity
+        state: "{{ is_state('input_boolean.chronos_b_lykeiou_sim_audio_online','on') }}"
+      - name: chronos_b_lykeiou_visual_station
+        unique_id: chronos_b_lykeiou_visual_station_tpl
+        device_class: connectivity
+        state: "{{ is_state('input_boolean.chronos_b_lykeiou_sim_visual_online','on') }}"
+

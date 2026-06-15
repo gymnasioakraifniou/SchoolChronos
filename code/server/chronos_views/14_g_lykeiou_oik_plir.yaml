@@ -1,0 +1,108 @@
+- title: Γ΄ Λυκείου Οικ. & Πληροφορικής
+  path: g_lykeiou_oik_plir
+  icon: mdi:school
+  cards:
+    - type: markdown
+      content: "# 🏫 Γ΄ Λυκείου Οικ. & Πληροφορικής"
+    - type: markdown
+      content: "> _{{ states('sensor.chronos_g_lykeiou_oik_plir_quote') }}_"
+    - type: picture
+      image: /local/chronos/rooms/g_lykeiou_oik_plir.jpg
+    - type: entities
+      title: "Σταθμοί Ειδοποίησης"
+      entities:
+        - entity: input_boolean.chronos_g_lykeiou_oik_plir_audio_enable
+        - entity: input_boolean.chronos_g_lykeiou_oik_plir_visual_enable
+    - type: vertical-stack
+      cards:
+        - type: entities
+          title: "⏱️ Αντίστροφη Μέτρηση"
+          entities:
+            - entity: input_number.chronos_g_lykeiou_oik_plir_timer_minutes
+              name: "Λεπτά"
+            - entity: timer.chronos_g_lykeiou_oik_plir_countdown
+              name: "Χρονόμετρο"
+        - type: horizontal-stack
+          cards:
+            - type: button
+              name: "Start / Pause"
+              icon: mdi:play-pause
+              tap_action:
+                action: call-service
+                service: script.chronos_timer_toggle
+                data:
+                  room: g_lykeiou_oik_plir
+            - type: button
+              name: "Reset"
+              icon: mdi:timer-off
+              tap_action:
+                action: call-service
+                service: script.chronos_timer_reset
+                data:
+                  room: g_lykeiou_oik_plir
+    - type: vertical-stack
+      cards:
+        - type: entities
+          title: "📨 Μήνυμα προς Διευθυντή"
+          entities:
+            - entity: input_text.chronos_g_lykeiou_oik_plir_director_msg
+              name: "Μήνυμα"
+        - type: button
+          name: "Αποστολή στον Διευθυντή"
+          icon: mdi:email-fast
+          tap_action:
+            action: call-service
+            service: script.chronos_send_director
+            data:
+              room: g_lykeiou_oik_plir
+              room_name: "Γ΄ Λυκείου Οικ. & Πληροφορικής"
+    - type: vertical-stack
+      cards:
+        - type: entities
+          title: "🔊 Εκφώνηση (TTS Google)"
+          entities:
+            - entity: input_text.chronos_g_lykeiou_oik_plir_tts_msg
+              name: "Κείμενο"
+        - type: button
+          name: "Εκφώνηση"
+          icon: mdi:text-to-speech
+          tap_action:
+            action: call-service
+            service: script.chronos_say_tts
+            data:
+              room: g_lykeiou_oik_plir
+              media_player: media_player.chronos_g_lykeiou_oik_plir_speaker
+    - type: markdown
+      content: "#### 🔊 Media Player Τάξης"
+    - type: conditional
+      conditions:
+        - entity: media_player.chronos_g_lykeiou_oik_plir_speaker
+          state_not: "unavailable"
+      card:
+        type: media-control
+        entity: media_player.chronos_g_lykeiou_oik_plir_speaker
+    - type: conditional
+      conditions:
+        - entity: media_player.chronos_g_lykeiou_oik_plir_speaker
+          state: "unavailable"
+      card:
+        type: markdown
+        content: "⚠️ Ο player της οθόνης δεν είναι ενεργός. Όρισε στο Browser Mod BrowserID = `g_lykeiou_oik_plir` (δες οδηγίες)."
+    - type: entities
+      title: "📡 Κατάσταση Σταθμών & Αισθητήρων"
+      entities:
+        - entity: binary_sensor.chronos_g_lykeiou_oik_plir_fire
+          name: "Πυρανίχνευση"
+        - entity: binary_sensor.chronos_g_lykeiou_oik_plir_audio_station
+          name: "Ηχητικός Σταθμός"
+        - entity: binary_sensor.chronos_g_lykeiou_oik_plir_visual_station
+          name: "Οπτικός Σταθμός"
+    - type: entities
+      title: "🧪 Προσομοίωση (SIM)"
+      entities:
+        - entity: input_boolean.chronos_g_lykeiou_oik_plir_sim_fire
+          name: "Φωτιά (SIM)"
+        - entity: input_boolean.chronos_g_lykeiou_oik_plir_sim_audio_online
+          name: "Ηχ. online (SIM)"
+        - entity: input_boolean.chronos_g_lykeiou_oik_plir_sim_visual_online
+          name: "Οπτ. online (SIM)"

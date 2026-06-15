@@ -1,0 +1,144 @@
+- title: Διεύθυνση
+  path: diefthynsi
+  icon: mdi:shield-account
+  cards:
+    - type: markdown
+      content: "# 🛡️ Κεντρικός Έλεγχος Σχολείου"
+    - type: conditional
+      conditions:
+        - entity: input_boolean.chronos_emergency
+          state: "on"
+      card:
+        type: markdown
+        content: "## 🔥 ΚΑΤΑΣΤΑΣΗ ΕΚΤΑΚΤΗΣ ΑΝΑΓΚΗΣ"
+    - type: entities
+      title: "Κατάσταση Συστήματος"
+      entities:
+        - entity: sensor.chronos_active_fire_count
+          name: "Ενεργοί Συναγερμοί Πυρκαγιάς"
+        - entity: input_boolean.chronos_emergency
+        - entity: input_boolean.chronos_mqtt_enabled
+    - type: markdown
+      content: "### Ισόγειο"
+    - type: grid
+      columns: 2
+      square: false
+      cards:
+        - type: tile
+          entity: binary_sensor.chronos_grafeio_diefthynti_fire
+          name: "Γραφείο Διευθυντή"
+          icon: mdi:account-tie
+          color: red
+          tap_action:
+            action: navigate
+            navigation_path: /chronos-school/grafeio_diefthynti
+        - type: tile
+          entity: binary_sensor.chronos_grafeio_kathigiton_fire
+          name: "Γραφείο Καθηγητών"
+          icon: mdi:human-male-board
+          color: red
+          tap_action:
+            action: navigate
+            navigation_path: /chronos-school/grafeio_kathigiton
+        - type: tile
+          entity: binary_sensor.chronos_aithousa_ekdiloseon_fire
+          name: "Αίθουσα Εκδηλώσεων"
+          icon: mdi:theater
+          color: red
+          tap_action:
+            action: navigate
+            navigation_path: /chronos-school/aithousa_ekdiloseon
+        - type: tile
+          entity: binary_sensor.chronos_b_lykeiou_fire
+          name: "Β΄ Λυκείου"
+          icon: mdi:school
+          color: red
+          tap_action:
+            action: navigate
+            navigation_path: /chronos-school/b_lykeiou
+        - type: tile
+          entity: binary_sensor.chronos_g_lykeiou_oik_plir_fire
+          name: "Γ΄ Λυκείου Οικ. & Πληροφορικής"
+          icon: mdi:school
+          color: red
+          tap_action:
+            action: navigate
+            navigation_path: /chronos-school/g_lykeiou_oik_plir
+        - type: tile
+          entity: binary_sensor.chronos_g_lykeiou_theor_fire
+          name: "Γ΄ Λυκείου Θεωρητική"
+          icon: mdi:school
+          color: red
+          tap_action:
+            action: navigate
+            navigation_path: /chronos-school/g_lykeiou_theor
+    - type: markdown
+      content: "### 1ος Όροφος"
+    - type: grid
+      columns: 2
+      square: false
+      cards:
+        - type: tile
+          entity: binary_sensor.chronos_a_gymnasiou_fire
+          name: "Α΄ Γυμνασίου"
+          icon: mdi:school-outline
+          color: red
+          tap_action:
+            action: navigate
+            navigation_path: /chronos-school/a_gymnasiou
+        - type: tile
+          entity: binary_sensor.chronos_b_gymnasiou_fire
+          name: "Β΄ Γυμνασίου"
+          icon: mdi:school-outline
+          color: red
+          tap_action:
+            action: navigate
+            navigation_path: /chronos-school/b_gymnasiou
+        - type: tile
+          entity: binary_sensor.chronos_g_gymnasiou_fire
+          name: "Γ΄ Γυμνασίου"
+          icon: mdi:school-outline
+          color: red
+          tap_action:
+            action: navigate
+            navigation_path: /chronos-school/g_gymnasiou
+        - type: tile
+          entity: binary_sensor.chronos_a_lykeiou_fire
+          name: "Α΄ Λυκείου"
+          icon: mdi:school
+          color: red
+          tap_action:
+            action: navigate
+            navigation_path: /chronos-school/a_lykeiou
+        - type: tile
+          entity: binary_sensor.chronos_erg_pliroforikis_fire
+          name: "Εργαστήριο Πληροφορικής"
+          icon: mdi:desktop-classic
+          color: red
+          tap_action:
+            action: navigate
+            navigation_path: /chronos-school/erg_pliroforikis
+        - type: tile
+          entity: binary_sensor.chronos_erg_fysikon_fire
+          name: "Εργαστήριο Φυσικών Επιστημών"
+          icon: mdi:flask
+          color: red
+          tap_action:
+            action: navigate
+            navigation_path: /chronos-school/erg_fysikon
+    - type: logbook
+      title: "Πρόσφατα Μηνύματα & Συμβάντα"
+      hours_to_show: 48
+      entities:
+        - input_text.chronos_grafeio_diefthynti_director_msg
+        - input_text.chronos_grafeio_kathigiton_director_msg
+        - input_text.chronos_aithousa_ekdiloseon_director_msg
+        - input_text.chronos_b_lykeiou_director_msg
+        - input_text.chronos_g_lykeiou_oik_plir_director_msg
+        - input_text.chronos_g_lykeiou_theor_director_msg
+        - input_text.chronos_a_gymnasiou_director_msg
+        - input_text.chronos_b_gymnasiou_director_msg
+        - input_text.chronos_g_gymnasiou_director_msg
+        - input_text.chronos_a_lykeiou_director_msg
+        - input_text.chronos_erg_pliroforikis_director_msg
+        - input_text.chronos_erg_fysikon_director_msg
