@@ -761,7 +761,18 @@ Open-source κώδικας και ανοιχτά πρωτόκολλα σημαί
 
 
 ---
-Επόμενη Φάση
+https://openedtech.ellak.gr/?post_type=robotics2026&p=16127
+
+https://www.youtube.com/playlist?list=PLbgluEUesGLp_0_S4LYgmyvJELm50DiLl
+
+https://youtu.be/91D3fHq8KVI
+
+https://youtu.be/t7-WolnnSHI
+
+https://youtu.be/yum4FahwY1E
+
+https://youtube.com/shorts/zRcXy6g1bxs
+
 
 ---
 
